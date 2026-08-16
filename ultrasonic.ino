@@ -35,6 +35,5 @@ void loop() {
 
 long microsecondsToCentimeters(long microseconds)
 {
-  // The speed of sound is 343 m/s. Invert: 1/343 s/m. Convert: 1/34300 s/cm. Convert: 10000/343 μs/cm = 29 μs/cm. 
   return microseconds / 29 / 2;
 }
