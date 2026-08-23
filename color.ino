@@ -1,51 +1,46 @@
-int redPinLeft = 8;
-int greenPinLeft = 9;
-int bluePinLeft = 10;
+int ledPins[2][3] = {{8, 9, 10}, {11, 12, 13}};
 
-int redPinRight = 11;
-int greenPinRight = 12;
-int bluePinRight = 13;
+enum Side {
+  LEFT,
+  RIGHT
+};
+
+const unsigned long indicatorInterval = 500;
+unsigned long previousIndicatorTime = 0;
+bool indicatorOn = false;
 
 void setup() {
-  pinMode(redPinLeft, OUTPUT);
-  pinMode(greenPinLeft, OUTPUT);
-  pinMode(bluePinLeft, OUTPUT);
-
-  pinMode(redPinRight, OUTPUT);
-  pinMode(greenPinRight, OUTPUT);
-  pinMode(bluePinRight, OUTPUT);
+  for (int i = 0; i < 2; i++) {
+    for (int j = 0; j < 3; j++) {
+      pinMode(ledPins[i][j], OUTPUT);
+    }
+  }
 }
 
 void loop() {
-  indicate("right"); 
+  indicate(LEFT); 
 }
 
-void setColor(int red, int green, int blue, String signal) {
-  if (signal == "left") {
-    analogWrite(redPinLeft, red);
-    analogWrite(greenPinLeft, green);
-    analogWrite(bluePinLeft, blue);
-  }
-
-  if (signal == "right") {
-    analogWrite(redPinRight, red);
-    analogWrite(greenPinRight, green);
-    analogWrite(bluePinRight, blue);
-  }
+void setColor(int red, int green, int blue, Side side) {
+  analogWrite(ledPins[side][0], red);
+  analogWrite(ledPins[side][1], green);
+  analogWrite(ledPins[side][2], blue);
 }
 
-void indicate(String signal) {
-  if (signal == "left") {
-    setColor(255, 130, 54, "left"); 
-    delay(500); 
-    setColor(0, 0, 0, "left"); 
-    delay(500);
-  }
+void indicate(Side side) {
+  unsigned long currentTime = millis();
 
-  if (signal == "right") {
-    setColor(255, 130, 54, "right"); 
-    delay(500); 
-    setColor(0, 0, 0, "right"); 
-    delay(500);
+  if (currentTime - previousIndicatorTime >= indicatorInterval) {
+    indicatorOn = !indicatorOn;
+
+    if (indicatorOn) {
+      setColor(255, 130, 54, side);
+    }
+
+    else {
+      setColor(0, 0, 0, side);
+    }
+
+    previousIndicatorTime = currentTime;
   }
 }
