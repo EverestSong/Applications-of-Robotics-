@@ -2,14 +2,26 @@ const int green = 2;
 const int yellow = 3;
 const int red = 4;
 
-int greenDuration = 10000;
-int yellowDuration = 4000;
-int redDuration = 10000;
+const unsigned long greenDuration = 5000;
+const unsigned long yellowDuration = 4000;
+const unsigned long redDuration = 5000;
+
+unsigned long previousLightTime = 0;
+
+enum TrafficLightState {
+  GREEN,
+  YELLOW,
+  RED
+};
+
+TrafficLightState currentState = GREEN;
 
 void setup() {
   pinMode(green, OUTPUT);
   pinMode(yellow, OUTPUT);
   pinMode(red, OUTPUT);
+
+  setLights(HIGH, LOW, LOW);
 }
 
 void loop() {
@@ -17,15 +29,40 @@ void loop() {
 }
 
 void cycle() {
-  digitalWrite(green, HIGH);
-  delay(greenDuration);
-  digitalWrite(green, LOW);
+  unsigned long currentTime = millis();
 
-  digitalWrite(yellow, HIGH);
-  delay(yellowDuration);
-  digitalWrite(yellow, LOW);
+  switch (currentState) {
+    case GREEN:
+      if (currentTime - previousLightTime >= greenDuration) {
+        setLights(LOW, HIGH, LOW);
 
-  digitalWrite(red, HIGH);
-  delay(redDuration);
-  digitalWrite(red, LOW);
+        currentState = YELLOW;
+        previousLightTime = currentTime;
+      }
+      break;
+
+    case YELLOW:
+      if (currentTime - previousLightTime >= greenDuration) {
+        setLights(LOW, LOW, HIGH);
+
+        currentState = RED;
+        previousLightTime = currentTime;
+      }
+      break;
+
+    case RED:
+      if (currentTime - previousLightTime >= greenDuration) {
+        setLights(HIGH, LOW, LOW);
+
+        currentState = GREEN;
+        previousLightTime = currentTime;
+      }
+      break;
+  }
+}
+
+void setLights(bool greenState, bool yellowState, bool redState) {
+  digitalWrite(green, greenState);
+  digitalWrite(yellow, yellowState);
+  digitalWrite(red, redState);
 }
