@@ -8,11 +8,7 @@ const unsigned long redDuration = 5000;
 
 unsigned long previousLightTime = 0;
 
-enum TrafficLightState {
-  GREEN,
-  YELLOW,
-  RED
-};
+enum TrafficLightState {GREEN, YELLOW, RED};
 
 TrafficLightState currentState = GREEN;
 
