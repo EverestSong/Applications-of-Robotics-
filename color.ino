@@ -1,9 +1,6 @@
 int ledPins[2][3] = {{8, 9, 10}, {11, 12, 13}};
 
-enum Side {
-  LEFT,
-  RIGHT
-};
+enum Side {LEFT, RIGHT};
 
 const unsigned long indicatorInterval = 500;
 unsigned long previousIndicatorTime = 0;
