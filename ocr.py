@@ -3,25 +3,37 @@ import pytesseract
 import cv2
 import numpy as np
 
-# Original Image
-image = np.array(Image.open("1_python-ocr.jpg"))
+# Original 
+image = np.array(Image.open("Stop2.png"))
+image = cv2.resize(image, (200, 200))
+
+# Gray
+gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
 # Normalized I
-image_empty = np.zeros((image.shape[0], image.shape[1]))
-image2 = cv2.normalize(image, image_empty, 0, 255, cv2.NORM_MINMAX)
+normalized = cv2.normalize(gray, None, 100, 255, cv2.NORM_MINMAX)
 
 # Threshold
-image3 = cv2.threshold(image2, 100, 255, cv2.THRESH_BINARY)[1]
+threshold = cv2.threshold(normalized, 200, 255, cv2.THRESH_BINARY)[1]
 
 # Gaussian Blur
-image4 = cv2.GaussianBlur(image3, (1, 1), 0)
+blur = cv2.GaussianBlur(threshold, (3, 3), 0)
 
-text = pytesseract.image_to_string(image4)
+# Invert
+invert = cv2.bitwise_not(threshold)
 
 cv2.imshow("Original", image)
-cv2.imshow("Normalized", image2)
-cv2.imshow("Threshold", image3)
-cv2.imshow("Gaussian Blur", image4)
+cv2.imshow("Gray", gray)
+cv2.imshow("Normalized", normalized)
+cv2.imshow("Threshold", threshold)
+cv2.imshow("Gaussian Blur", blur)
+cv2.imshow("Inverted", invert)
 
-print(text)
+print("Original: " + pytesseract.image_to_string(image))
+print("Grey: " + pytesseract.image_to_string(gray))
+print("Normalized: " + pytesseract.image_to_string(normalized))
+print("Thresh: " + pytesseract.image_to_string(threshold))
+print("Blur: " + pytesseract.image_to_string(blur))
+print("Invert: " + pytesseract.image_to_string(invert))
+
 cv2.waitKey(0)
