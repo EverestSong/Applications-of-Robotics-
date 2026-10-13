@@ -3,7 +3,7 @@ import cv2
 
 width = 320
 height = 240
-config = "--psm 7 -c tessedit_char_whitelist=abcdefghilklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ" 
+config = "--psm 7 -c tessedit_char_whitelist=abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ" 
 
 cam = cv2.VideoCapture(0)
 
