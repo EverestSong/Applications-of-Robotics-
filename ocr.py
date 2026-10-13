@@ -1,40 +1,37 @@
 import pytesseract
 import cv2
 
-config = "--psm 7"
+width = 320
+height = 240
+config = "--psm 7 -c tessedit_char_whitelist=abcdefghilklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ" 
 
-# Original 
-image = cv2.imread("GiveWay.jpg")
-image = cv2.resize(image, None, fx=0.4, fy=0.4)
+cam = cv2.VideoCapture(0)
 
-# Gray
-gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+while True:
+    check, frame = cam.read()
+    
+    # Original 
+    image = cv2.resize(frame, (width, height))
 
-# Gaussian Blur
-blur = cv2.GaussianBlur(gray, (3, 3), 0)
+    # Gray
+    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
-# Normalized I
-normalized = cv2.normalize(blur, None, 150, 255, cv2.NORM_MINMAX)
+    # Normalized I
+    normalized = cv2.normalize(gray, None, 0, 255, cv2.NORM_MINMAX)
 
-# Threshold
-threshold = cv2.threshold(normalized, 200, 255, cv2.THRESH_BINARY)[1]
+    # Threshold
+    threshold = cv2.threshold(normalized, 100, 255, cv2.THRESH_BINARY)[1]
 
-# Invert
-invert = cv2.bitwise_not(threshold)
+    # Gaussian Blur
+    blur = cv2.GaussianBlur(threshold, (3, 3), 0)
 
-images = {
-    "Original": image, 
-    "Gray": gray, 
-    "Gaussian Blur": blur, 
-    "Normalized": normalized,  
-    "Threshold": threshold, 
-    "Invert": invert
-}
+    cv2.imshow("Image", image)
+    cv2.imshow("Blurred", blur)
+    print(f"Blurred: " + pytesseract.image_to_string(blur, config=config))
 
-for name, processed_image in images.items():
-    cv2.imshow(name, processed_image)
-    text = pytesseract.image_to_string(processed_image, config=config)
-    print(f"{name}: {text}")
+    key = cv2.waitKey(1)
+    if key == 27: 
+        break
 
-cv2.waitKey(0)
+cam.release()
 cv2.destroyAllWindows()
