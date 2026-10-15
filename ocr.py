@@ -1,37 +1,40 @@
 import pytesseract
 import cv2
 
-width = 320
-height = 240
-config = "--psm 7 -c tessedit_char_whitelist=abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ" 
+config = "--psm 11 -c tessedit_char_whitelist=abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
-cam = cv2.VideoCapture(0)
+# Original 
+image = cv2.imread("3_python-ocr.jpg")
+image = cv2.resize(image, None, fx=0.4, fy=0.4)
 
-while True:
-    check, frame = cam.read()
-    
-    # Original 
-    image = cv2.resize(frame, (width, height))
+# Gray
+gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
-    # Gray
-    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+# Gaussian Blur
+blur = cv2.GaussianBlur(gray, (3, 3), 0)
 
-    # Normalized I
-    normalized = cv2.normalize(gray, None, 0, 255, cv2.NORM_MINMAX)
+# Normalized I
+normalized = cv2.normalize(blur, None, 150, 255, cv2.NORM_MINMAX)
 
-    # Threshold
-    threshold = cv2.threshold(normalized, 100, 255, cv2.THRESH_BINARY)[1]
+# Threshold
+threshold = cv2.threshold(normalized, 200, 255, cv2.THRESH_BINARY)[1]
 
-    # Gaussian Blur
-    blur = cv2.GaussianBlur(threshold, (3, 3), 0)
+# Invert
+invert = cv2.bitwise_not(threshold)
 
-    cv2.imshow("Image", image)
-    cv2.imshow("Blurred", blur)
-    print(f"Blurred: " + pytesseract.image_to_string(blur, config=config))
+images = {
+    "Original": image, 
+    "Gray": gray, 
+    "Gaussian Blur": blur, 
+    "Normalized": normalized,  
+    "Threshold": threshold, 
+    "Invert": invert
+}
 
-    key = cv2.waitKey(1)
-    if key == 27: 
-        break
+for name, processed_image in images.items():
+    cv2.imshow(name, processed_image)
+    text = pytesseract.image_to_string(processed_image)
+    print(f"{name}: {text}")
 
-cam.release()
+cv2.waitKey(0)
 cv2.destroyAllWindows()
