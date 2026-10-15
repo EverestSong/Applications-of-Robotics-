@@ -20,7 +20,7 @@ while True:
     normalized = cv2.normalize(gray, None, 0, 255, cv2.NORM_MINMAX)
 
     # Threshold
-    threshold = cv2.threshold(normalized, 100, 255, cv2.THRESH_BINARY)[1]
+    threshold = cv2.threshold(normalized, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1]
 
     # Gaussian Blur
     blur = cv2.GaussianBlur(threshold, (3, 3), 0)
