@@ -4,7 +4,7 @@ import cv2
 config = "--psm 11 -c tessedit_char_whitelist=abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
 # Original 
-image = cv2.imread("3_python-ocr.jpg")
+image = cv2.imread("GiveWay.jpg")
 image = cv2.resize(image, None, fx=0.4, fy=0.4)
 
 # Gray
@@ -17,7 +17,7 @@ blur = cv2.GaussianBlur(gray, (3, 3), 0)
 normalized = cv2.normalize(blur, None, 150, 255, cv2.NORM_MINMAX)
 
 # Threshold
-threshold = cv2.threshold(normalized, 200, 255, cv2.THRESH_BINARY)[1]
+threshold = cv2.threshold(normalized, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1]
 
 # Invert
 invert = cv2.bitwise_not(threshold)
@@ -33,7 +33,7 @@ images = {
 
 for name, processed_image in images.items():
     cv2.imshow(name, processed_image)
-    text = pytesseract.image_to_string(processed_image)
+    text = pytesseract.image_to_string(processed_image, config=config)
     print(f"{name}: {text}")
 
 cv2.waitKey(0)
