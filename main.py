@@ -20,6 +20,10 @@ cam.set(cv2.CAP_PROP_FPS, 30)
 previousTime = 0
 currentTime = 0
 
+stopSent = False
+stopWord = "Lenovo"
+arduino.write("GO\n".encode('utf-8')) 
+
 def regionOfInterest(edges):
     polygon = np.array([(0,480), (160,0), (480,0), (640,480)], dtype=np.int32)
     mask = np.zeros_like(edges)
@@ -52,34 +56,36 @@ while True:
     if linesP is not None:
         for i in range(0, len(linesP)):
             l = linesP[i][0]
-            #print(l)
             x1, y1, x2, y2 = l[0], l[1], l[2], l[3]
 
             # Draw lines
             cv2.line(cdstP, (x1, y1), (x2, y2), (0, 0, 255), 2, cv2.LINE_AA)  
 
-            # Gradient
+            # Finding the angle using slope
             dx = x2 - x1
             dy = y2 - y1	
 
-            if dx != 0: 
-                m = round((dy/dx), 2)
+            angle = np.arctan2(dy, dx) * (180/np.pi)
+
+            if abs(angle) < 20:
+                continue
 
             # Midpoints
             cx = int((x1 + x2)/2)
             cy = int((y1 + y2)/2)
 
-            cv2.circle(cdstP, (cx, cy), 5, (255, 255, 255), 3)
-
             # Sorting
-            if cx < imageCentreX:
+            if cx < imageCentreX and len(leftPoints) <= 10:
                 leftPoints.append(cx)
-            else:
-                rightPoints.append(cx)
+                cv2.circle(cdstP, (cx, cy), 5, (255, 255, 255), 3)
 
+            elif len(rightPoints) <= 10:
+                rightPoints.append(cx)
+                cv2.circle(cdstP, (cx, cy), 5, (255, 255, 255), 3)
+            
     if (len(leftPoints) != 0) and (len(rightPoints) != 0):
-        leftTapeX = statistics.mean(leftPoints)
-        rightTapeX = statistics.mean(rightPoints)
+        leftTapeX = statistics.median(leftPoints)
+        rightTapeX = statistics.median(rightPoints)
         
         laneCentreX = (leftTapeX + rightTapeX)/2
         error = round((laneCentreX - imageCentreX)/10, 2) 
@@ -89,8 +95,8 @@ while True:
         arduino.write((str(error) + "\n").encode('utf-8'))
 
     # Draw Lines
-    cv2.line(cdstP, (0,480), (160,0), (255, 255, 255), 2, cv2.LINE_AA)  
-    cv2.line(cdstP, (480,0), (640,480), (255, 255, 255), 2, cv2.LINE_AA)  
+    cv2.line(cdstP, (0, 480), (160, 0), (255, 255, 255), 2, cv2.LINE_AA)  
+    cv2.line(cdstP, (480, 0), (640, 480), (255, 255, 255), 2, cv2.LINE_AA)  
     cv2.line(cdstP, (width // 2, height), (width // 2, 0), (0, 255, 255), 2, cv2.LINE_AA)  
 
     # FPS
@@ -102,6 +108,8 @@ while True:
     # Display Camera Feed
     cv2.imshow("Original Frame", frame)
     cv2.imshow("Detected Lines (Probabilistic Line Transform)", cdstP)
+
+    print(leftPoints)
 
     #print(leftPoints)
     key = cv2.waitKey(1)
